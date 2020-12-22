@@ -1,0 +1,29 @@
+{
+  "name": "crawler-manger",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "element-ui": "^2.14.1",
+    "lodash": "^4.17.20",
+    "nprogress": "^0.2.0",
+    "vue": "^2.6.12",
+    "vue-router": "^3.2.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@vue/cli-plugin-babel": "^4.5.0",
+    "@vue/cli-service": "^4.5.0",
+    "axios": "^0.19.2",
+    "babel-plugin-component": "^1.1.1",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "less": "^3.12.2",
+    "less-loader": "^6.2.0",
+    "vue-cli-plugin-element": "^1.0.1",
+    "vue-template-compiler": "^2.6.12"
+  }
+}

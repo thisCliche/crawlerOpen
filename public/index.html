@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <title><%= htmlWebpackPlugin.options.isProd ? '' : 'dev - ' %><%= htmlWebpackPlugin.options.title %></title>
+  <% if(htmlWebpackPlugin.options.isProd) { %>
+  <!-- nprogress 的样式表文件 -->
+  <link rel="stylesheet" href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.css" />
+ 
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.staticfile.org/vue/2.6.11/vue.min.js"></script>
+  
+  <script src="https://cdn.staticfile.org/vue-router/3.1.6/vue-router.min.js"></script>
+  
+  <script src="https://cdn.staticfile.org/axios/0.19.2/axios.min.js"></script>
+  <script src="https://cdn.staticfile.org/lodash.js/4.17.15/lodash.min.js"></script>
+  <script src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.min.js"></script>
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <% } %>
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+      Please enable it to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+/* 全局样式表 */
+*{box-sizing: border-box;}
+html,body,#app{height: 100%; margin: 0; padding: 0;min-width: 1366px;}
+
+.el-breadcrumb {margin-bottom: 15px;font-size: 12px;}
+.el-card {box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) !important;}
+.el-table{margin-top: 15px;font-size: 12px;}
+
+.ql-editor{min-height: 300px;}
+/* .el-cascader{width: 100%;}
+.el-cascader-menu {   height: 240px; } */
+.el-message-box__content{height: 400px;
+  overflow-y: auto;}
+  .el-message-box{width: 50%;}
