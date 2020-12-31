@@ -4,6 +4,7 @@ const Home = () => import( /* webpackChunkName: "Login_home_welcome" */ '../view
 const Welcome = () => import( /* webpackChunkName: "Login_home_welcome" */ '../views/Welcome.vue')
 const District = () => import( /* webpackChunkName: "Cate_params" */ '../views/district/District.vue')
 const Crawler = () => import( /* webpackChunkName: "Orders_report" */ '../views/crawler/Crawler.vue')
+const ScriptTemp = () => import( /* webpackChunkName: "Orders_report" */ '../views/crawler/ScriptTemp.vue')
 const Rule = () => import( /* webpackChunkName: "Orders_report" */ '../views/crawler/Rule.vue')
 const Policy = () => import( /* webpackChunkName: "Orders_report" */ '../views/policy/Policy.vue')
 Vue.use(VueRouter)
@@ -26,6 +27,11 @@ const routes = [{
       path: '/crawler',
       component: Crawler,
       name: 'Crawler'
+    },
+    {
+      path: '/scripttemp',
+      component: ScriptTemp,
+      name: 'ScriptTemp'
     },
     {
       path: '/rule',

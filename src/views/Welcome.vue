@@ -1,21 +1,25 @@
 <template>
   <div class="">
-    欢迎使用爬虫后台管理系统 V1.0
+    欢迎使用爬虫后台管理系统 V1.2.1
     <el-card style="min-height: 400px; margin-top: 20px">
-      <el-row :gutter="6">
-        <el-col :span="6">
+      <el-row :gutter="4">
+        <el-col :span="3">
           <el-cascader
             clearable
             filterable
-            placeholder="请选择"
+            placeholder="选择地域"
             v-model="criCode"
             :options="ProvinceList"
             :props="props"
-            @change="handleChange"
+            @change="selectDistrict"
           ></el-cascader>
         </el-col>
-        <el-col :span="6">
-          <el-select @change='changeVal' v-model="value" placeholder="日志类型">
+        <el-col :span="3">
+          <el-select
+            @change="handleChange"
+            v-model="value"
+            placeholder="日志类型"
+          >
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -24,6 +28,38 @@
             >
             </el-option>
           </el-select>
+        </el-col>
+        <el-col :span="3">
+          <el-select
+            @change="handleChange"
+            v-model="crawlerId"
+            placeholder="爬虫名称"
+            no-data-text="请先选择地域"
+            clearable
+          >
+            <el-option
+              v-for="item in crawlerlist"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            @change="handleChange"
+            v-model="timeRange"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="yyyy-MM-dd"
+            :picker-options="pickerOptions"
+          >
+          </el-date-picker>
         </el-col>
       </el-row>
       <!-- 爬虫列表 -->
@@ -41,7 +77,7 @@
           </template>
         </el-table-column>
         <el-table-column label="日志信息" prop="logContext"></el-table-column>
-        <el-table-column label="日志时间" prop="createDate"></el-table-column>
+        <el-table-column label="日志时间" width="180" prop="createDate"></el-table-column>
       </el-table>
       <!-- 分页区域 -->
       <el-pagination
@@ -65,6 +101,38 @@ export default {
   name: "",
   data() {
     return {
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+        ],
+      },
+      timeRange: [],
       options: [
         {
           value: "2",
@@ -73,11 +141,13 @@ export default {
         {
           value: "1",
           label: "正确日志",
-        }
+        },
       ],
-      value: "",
+      value: "2",
       criCode: [],
+      crawlerlist: [],
       logType: 2,
+      crawlerId: "",
       ProvinceList: [],
       props: {
         expandTrigger: "hover",
@@ -85,8 +155,9 @@ export default {
         label: "criName",
         lazy: true,
         lazyLoad: this.lazyLoad,
+        checkStrictly: true
       },
-      policyList: [],
+      policyList: ["", ""],
       // 获取爬虫列表的参数对象
       queryInfo: {
         // query: "",
@@ -102,10 +173,6 @@ export default {
   computed: {},
   watch: {},
   methods: {
-    changeVal(val) {
-      this.logType = val
-      this.getPolicyList(this.criCode[1], val)
-    },
     lazyLoad(node, resolve) {
       this.$http
         .post(
@@ -119,24 +186,58 @@ export default {
           }
         )
         .then((res) => {
-          res.data.data.forEach((item) => {
-            item.leaf = true;
-          });
+          // res.data.data.forEach((item) => {
+          //   item.leaf = true;
+          // });
           resolve(res.data.data);
         });
     },
-    handleChange(value) {
-      this.getPolicyList(value[1],this.logType);
+    selectDistrict(val) {
+      if(val) this.crawlerId = ''
+      this.getCrawlerList(val[val.length-1]);
+      this.handleChange();
+    },
+    handleChange() {
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.queryInfo = {page: 1,
+        size: 10,}
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        this.value,
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
     },
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
       this.queryInfo.size = newSize;
-      this.getPolicyList(this.criCode[1],this.logType);
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        this.value,
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
     },
     // 监听 页码值 改变的事件
     handleCurrentChange(newPage) {
       this.queryInfo.page = newPage;
-      this.getPolicyList(this.criCode[1],this.logType);
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        this.value,
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
     },
     // 获取省市
     async getProvince() {
@@ -146,11 +247,24 @@ export default {
       this.ProvinceList = ProvinceList.data.data;
     },
     // 获取日志
-    async getPolicyList(value, logType = 2) {
+    async getPolicyList(
+      value = '',
+      logType = 2,
+      startTime = "today",
+      Endtime = "today",
+      jspaId = ""
+    ) {
       let policyList = await this.$http
         .post(
           "pachong/jspaLog/getJspaPolicy",
-          qs.stringify({ criCode: value,logType, ...this.queryInfo }),
+          qs.stringify({
+            criCode: value,
+            logType,
+            ...this.queryInfo,
+            startTime,
+            Endtime,
+            jspaId,
+          }),
           {
             headers: {
               "Content-Type":
@@ -171,16 +285,37 @@ export default {
         callback: (_) => {},
       });
     },
+    async getCrawlerList(value) {
+      let crawlerList = await this.$http
+        .post(
+          `pachong/jspaJspa/getJspaJspaQuery`,
+          qs.stringify({ criCode: value }),
+          {
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+          }
+        )
+        .then((res) => {
+          if (res.data.code != "200")
+            return this.$message.error("获取列表失败");
+          this.crawlerlist = res.data.data;
+        });
+    },
   },
   created() {},
   mounted() {
     this.getProvince();
-    this.getPolicyList("", 2);
+    this.getPolicyList();
   },
 };
 </script>
 <style lang="less" scoped>
 .el-pagination {
   margin-top: 15px;
+}
+/deep/ .el-input__inner{
+  width: 100%;
 }
 </style>

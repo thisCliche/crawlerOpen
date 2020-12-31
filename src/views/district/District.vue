@@ -31,7 +31,8 @@
             <el-table-column label="等级" width="180">
               <template slot-scope="scope">
                 <el-tag v-if="scope.row.criLevel == 1" type="primary" size="mini">省级</el-tag>
-              <el-tag v-else type="success" size="mini">市级</el-tag>
+                <el-tag v-else-if="scope.row.criLevel == 2" type="warning" size="mini">市级</el-tag>
+                <el-tag v-else type="success" size="mini">区/县级</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="操作">
@@ -75,7 +76,7 @@
               :props="cascaderProps"
               @change="parentCateChanged"
               clearable
-              change-on-select
+              
             ></el-cascader>
           </el-form-item>
         </el-form>
@@ -98,7 +99,11 @@ export default {
     return {
       addCateDialogVisible: false,
       ProvinceTable: [],
-      cascaderProps: { expandTrigger: 'hover',  value: 'criCode', label: 'criName'},
+      cascaderProps: { expandTrigger: 'hover',  value: 'criCode', label: 'criName',
+        lazy: true,
+        lazyLoad:this.lazyLoad,
+        checkStrictly: true
+      },
       //添加分类表单的验证规则
       addCateFormRules: {
         criName: [
@@ -134,11 +139,32 @@ export default {
   },
   watch: {},
   methods: {
-    
+    lazyLoad(node, resolve) {
+      this.$http
+        .post(
+          "pachong/jsqaRegionInfo/getRegionCorrespondCity",
+          qs.stringify({ criCode: node.value }),
+          {
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+          }
+        )
+        .then((res) => {
+          res.data.data.forEach((item) => {
+            item.leaf = true;
+          });
+          resolve(res.data.data);
+        });
+    },
     load(tree, treeNode, resolve) {
         this.$http.post('pachong/jsqaRegionInfo/getRegionCorrespondCity',qs.stringify({criCode:tree.criCode}),{headers:{
           'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'
         }}).then(res=>{
+          res.data.data.forEach(item => {
+        item.hasChildren = true
+      })
           resolve(res.data.data)
         })
       },
@@ -155,7 +181,10 @@ export default {
       },
     // 级联选择数据发生变化
     parentCateChanged(val) {
-      if(val.length != 0) {
+      if(val.length == 2) {
+        this.addCri.criLevel = '3'
+        this.addCri.criSuperiorCode = val[1]
+      }else if(val.length == 1){
         this.addCri.criLevel = '2'
         this.addCri.criSuperiorCode = val[0]
       }

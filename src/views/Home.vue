@@ -5,7 +5,7 @@
       <div>
         <!-- <img src="../assets/logo.jpg" alt /> -->
         <i class="icon-pachong iconfont" style="font-size:40px;margin-left:16px;"></i>
-        <span>爬虫后台管理系统 V1.0</span>
+        <span>爬虫后台管理系统 V1.2.1</span>
       </div>
       <!-- <el-button type="info" @click="logout">退出</el-button> -->
     </el-header>
@@ -71,15 +71,20 @@ export default {
           }]
         },
         {
-          authName: '代码管理',
+          authName: '爬虫管理',
           id: 145,
           order: 2,
           path: 'crawler',
           children:[{
-            authName: '爬虫规则',
+            authName: '爬虫列表',
             id: 111,
             order: null,
             path: 'crawler'
+          },{
+            authName: '脚本模板',
+            id: 114,
+            order: null,
+            path: 'scripttemp'
           }]
         },
         {
@@ -92,6 +97,18 @@ export default {
             id: 112,
             order: null,
             path: 'policy'
+          }]
+        },
+        {
+          authName: '日志管理',
+          id: 101,
+          order: 3,
+          path: 'welcome',
+          children:[{
+            authName: '日志列表',
+            id: 113,
+            order: null,
+            path: 'welcome'
           }]
         },
       ],

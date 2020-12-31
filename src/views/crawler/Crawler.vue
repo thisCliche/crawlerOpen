@@ -4,7 +4,7 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>代码管理</el-breadcrumb-item>
-      <el-breadcrumb-item>爬虫规则</el-breadcrumb-item>
+      <el-breadcrumb-item>爬虫列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 卡片视图 -->
     <el-card style="min-height: 400px">
@@ -162,6 +162,7 @@ export default {
         label: "criName",
         lazy: true,
         lazyLoad: this.lazyLoad,
+        checkStrictly: true
       },
       ProvinceList: [],
       // 获取爬虫列表的参数对象
@@ -222,14 +223,19 @@ export default {
           }
         )
         .then((res) => {
-          res.data.data.forEach((item) => {
-            item.leaf = true;
-          });
+          // res.data.data.forEach((item) => {
+          //   item.leaf = true;
+          // });
           resolve(res.data.data);
         });
     },
     handleChange(value) {
-      this.getCrawlerList(value[1]);
+      // 切换城市清除分页缓存
+      this.queryInfo= {
+        page: 1,
+        size: 10,
+      }
+      this.getCrawlerList(value[value.length-1]);
     },
     addCrawler() {
       if (this.criCode.length == 0) {
@@ -244,14 +250,14 @@ export default {
     },
     // 添加爬虫
     confirm(formName) {
-      this.form.blongRegion = this.criCode[1];
+      this.form.blongRegion = this.criCode[this.criCode.length-1];
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$http
             .post("pachong/jspaJspa/savePachong", this.form)
             .then((res) => {
               if (res.data.code != "200") return this.$message.error(res.data.data);
-              this.getCrawlerList(this.criCode[1]);
+              this.getCrawlerList(this.criCode[this.criCode.length-1]);
               this.$message.success("添加成功");
               this.$refs[formName].resetFields();
               this.dialogVisible = false;
@@ -265,7 +271,7 @@ export default {
     deleteUser(id) {
       this.$http.post(`pachong/jspaJspa/deletePachong?id=${id}`).then(res=>{
           if(res.data.code != '200') return this.$message.error("删除失败");
-          this.getCrawlerList(this.criCode[1])
+          this.getCrawlerList(this.criCode[this.criCode.length-1])
           this.$message.success("删除成功");
         })
     },
@@ -293,12 +299,12 @@ export default {
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
       this.queryInfo.size = newSize;
-      this.getCrawlerList(this.criCode[1]);
+      this.getCrawlerList(this.criCode[this.criCode.length-1]);
     },
     // 监听 页码值 改变的事件
     handleCurrentChange(newPage) {
       this.queryInfo.page = newPage;
-      this.getCrawlerList(this.criCode[1]);
+      this.getCrawlerList(this.criCode[this.criCode.length-1]);
     },
     // 获取省市
     async getProvince() {
@@ -311,7 +317,7 @@ export default {
     async getCrawlerList(value) {
       let crawlerList = await this.$http
         .post(
-          `/pachong/jspaJspa/getJspaJspa`,
+          `pachong/jspaJspa/getJspaJspa`,
           qs.stringify({ criCode: value, ...this.queryInfo }),
           {
             headers: {
@@ -360,7 +366,7 @@ export default {
             .post("pachong/jspaJspa/updateJspa", this.editFrom)
             .then((res) => {
               if (res.data.code != "200") return this.$message.error(res.data.data);
-              this.getCrawlerList(this.criCode[1]);
+              this.getCrawlerList(this.criCode[this.criCode.length-1]);
               this.$message.success("修改成功");
               this.$refs[formName].resetFields();
               this.editDialogVisible = false;

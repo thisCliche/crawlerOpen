@@ -7,17 +7,49 @@
       <el-breadcrumb-item>政策列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card style="min-height: 400px">
-      <el-row>
-        <el-col :span="6">
+      <el-row :gutter="4">
+        <el-col :span="3">
           <el-cascader
             clearable
             filterable
-            placeholder="请选择"
+            placeholder="选择地域"
             v-model="criCode"
             :options="ProvinceList"
             :props="props"
-            @change="handleChange"
+            @change="selectDistrict"
           ></el-cascader>
+        </el-col>
+        <el-col :span="3">
+          <el-select
+            @change="handleChange"
+            v-model="crawlerId"
+            placeholder="爬虫名称"
+            no-data-text="请先选择地域"
+            clearable
+          >
+            <el-option
+              v-for="item in crawlerlist"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            @change="handleChange"
+            v-model="timeRange"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="yyyy-MM-dd"
+            :picker-options="pickerOptions"
+          >
+          </el-date-picker>
         </el-col>
       </el-row>
       <!-- 爬虫列表 -->
@@ -56,12 +88,47 @@ export default {
     return {
       criCode: [],
       ProvinceList: [],
+      crawlerId:'',
+      crawlerlist:[],
+      timeRange:[],
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+        ],
+      },
       props: {
         expandTrigger: "hover",
         value: "criCode",
         label: "criName",
         lazy: true,
         lazyLoad: this.lazyLoad,
+        checkStrictly: true
       },
       policyList:[],
       // 获取爬虫列表的参数对象
@@ -75,7 +142,6 @@ export default {
       total: 0
     }
   },
-
   components: {},
   computed: {},
   methods: {
@@ -92,24 +158,56 @@ export default {
           }
         )
         .then((res) => {
-          res.data.data.forEach((item) => {
-            item.leaf = true;
-          });
+          // res.data.data.forEach((item) => {
+          //   item.leaf = true;
+          // });
           resolve(res.data.data);
         });
     },
-    handleChange(value) {
-      this.getPolicyList(value[1]);
+    selectDistrict(val) {
+      if(val) this.crawlerId = ''
+      this.getCrawlerList(val[val.length-1]);
+      this.handleChange();
     },
+    handleChange() {
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.queryInfo = {page: 1,
+        size: 10,}
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
+    },
+
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
       this.queryInfo.size = newSize;
-      this.getPolicyList(this.criCode[1]);
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
     },
     // 监听 页码值 改变的事件
     handleCurrentChange(newPage) {
       this.queryInfo.page = newPage;
-      this.getPolicyList(this.criCode[1]);
+      let startTime, Endtime;
+      startTime = this.timeRange ? this.timeRange[0] : "today";
+      Endtime = this.timeRange ? this.timeRange[1] : "today";
+      this.getPolicyList(
+        this.criCode[this.criCode.length-1],
+        startTime,
+        Endtime,
+        this.crawlerId
+      );
     },
     // 获取省市
     async getProvince() {
@@ -119,8 +217,10 @@ export default {
       this.ProvinceList = ProvinceList.data.data;
     },
     // 获取政策
-    async getPolicyList(value) {
-      let policyList = await this.$http.post('pachong/jspaPolicy/getJspaPolicy',qs.stringify({ criCode: value, ...this.queryInfo }),
+    async getPolicyList(value='',startTime = "today",
+      Endtime = "today",
+      jspaId = "") {
+      let policyList = await this.$http.post('pachong/jspaPolicy/getJspaPolicy',qs.stringify({ criCode: value, ...this.queryInfo,startTime,Endtime,jspaId }),
           {
             headers: {
               "Content-Type":
@@ -136,7 +236,25 @@ export default {
       this.$alert(all, '全部内容',{
           confirmButtonText: '确定',
           callback: _=>{}});
-    }
+    },
+    async getCrawlerList(value) {
+      let crawlerList = await this.$http
+        .post(
+          `pachong/jspaJspa/getJspaJspaQuery`,
+          qs.stringify({ criCode: value }),
+          {
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+          }
+        )
+        .then((res) => {
+          if (res.data.code != "200")
+            return this.$message.error("获取列表失败");
+          this.crawlerlist = res.data.data;
+        });
+    },
   },
   created() {},
   mounted() {
@@ -156,5 +274,8 @@ overflow:hidden;
  display:-webkit-box; 
  -webkit-box-orient:vertical;
  -webkit-line-clamp:3;
+}
+/deep/ .el-input__inner{
+  width: 100%;
 }
 </style>
