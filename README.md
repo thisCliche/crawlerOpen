@@ -1,4 +1,4 @@
-# vue_shop
+# crawler-manger
 
 ## Project setup
 ```

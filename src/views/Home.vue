@@ -5,7 +5,7 @@
       <div>
         <!-- <img src="../assets/logo.jpg" alt /> -->
         <i class="icon-pachong iconfont" style="font-size:40px;margin-left:16px;"></i>
-        <span>爬虫后台管理系统 V1.2.1</span>
+        <span>爬虫后台管理平台 V1.2.1</span>
       </div>
       <!-- <el-button type="info" @click="logout">退出</el-button> -->
     </el-header>
