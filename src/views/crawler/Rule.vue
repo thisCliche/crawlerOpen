@@ -404,6 +404,7 @@ export default {
           return this.$alert(res.data.data, "成功", {
             confirmButtonText: "确定",
             callback: (_) => {},
+            closeOnPressEscape: true
           });
         });
     },

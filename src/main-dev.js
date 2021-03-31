@@ -9,10 +9,12 @@ import axios from 'axios'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 // 配置请求根路径
+// axios.defaults.baseURL = 'http://47.96.121.235:8080/'
 axios.defaults.baseURL = 'http://192.168.90.7:8080/'
 // axios请求拦截器，请求头必须含有 Authorization ,在 request 拦截器中，展示进度条 Nprogress.start()
 axios.interceptors.request.use(config => {
   NProgress.start()
+  config.headers.Authorization = window.sessionStorage.getItem('token')
   return config
 })
 // 在 response 拦截器中，隐藏进度条 Nprogress.done()

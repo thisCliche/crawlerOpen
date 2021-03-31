@@ -7,8 +7,9 @@ html,body,#app{height: 100%; margin: 0; padding: 0;min-width: 1366px;}
 .el-table{margin-top: 15px;font-size: 12px;}
 
 .ql-editor{min-height: 300px;}
-/* .el-cascader{width: 100%;}
-.el-cascader-menu {   height: 240px; } */
+.el-cascader{width: 100%;}
+.el-cascader-menu {   height: 240px; }
+.el-scrollbar__wrap{overflow-x: hidden;}
 .el-message-box__content{height: 400px;
   overflow-y: auto;}
   .el-message-box{width: 50%;}

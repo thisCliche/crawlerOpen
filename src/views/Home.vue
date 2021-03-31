@@ -7,7 +7,7 @@
         <i class="icon-pachong iconfont" style="font-size:40px;margin-left:16px;"></i>
         <span>爬虫后台管理平台 V1.2.1</span>
       </div>
-      <!-- <el-button type="info" @click="logout">退出</el-button> -->
+      <el-button type="info" @click="logout">退出</el-button>
     </el-header>
     <!-- 页面主体区域 -->
     <el-container>
@@ -134,15 +134,18 @@ export default {
       })
     },
     logout() {
-      this.$confirm('是否确定退出登录？','提示',{
-        confirmButtonText:'确定',cancelButtonText: '取消',type: 'warning'
-      }).then(() => {
-        this.$message.success('退出成功！')
+      // this.$confirm('是否确定退出登录？','提示',{
+      //   confirmButtonText:'确定',cancelButtonText: '取消',type: 'warning'
+      // }).then(() => {
+      //   this.$message.success('退出成功！')
+      //   window.sessionStorage.clear()
+      //   this.$router.push("/login")
+      // }).catch(()=>{
+      //     this.$message.info('已取消退出！')
+      // })
+      this.$message.success('退出成功！')
         window.sessionStorage.clear()
         this.$router.push("/login")
-      }).catch(()=>{
-          this.$message.info('已取消退出！')
-      })
     },
     async getMenuList() {
       const {data: res} = await this.$http.get('menus');
